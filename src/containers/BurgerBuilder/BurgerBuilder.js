@@ -28,24 +28,25 @@ class BurgerBuilder extends Component {
             cheese: 0,
             meat: 0
         },
-        totalPrice: 4, 
-        purchaseable: false
+        totalPrice: 4,
+        purchaseable: false, //purchaseable = true - ativa o botão Checkout - quando acrescentamos ingredientes
+        purchasing: false //purchasing = true - mostrar modal com Order Summary - depois de clicar no botão Checkout
     }
 
-    updatePurchaseState (ingredients) {
+    updatePurchaseState(ingredients) {
         // const ingredients = {           Pode causar problemas 
         //     ...this.state.ingredients   pois o estado obtido não é o mais atualizado... 
         // };                              é melhor receber o objeto já atualizado
-        
+
         //Return the values from each key on the ingredients object (from state)
         const sum = Object.keys(ingredients)
-        .map(igKey => { //espécie de foreach Object Key
-            return ingredients[igKey] //dá return ao Value dessa Key
-        })
-        .reduce((sum, el) => {  //depois junta os valores do 
-            return sum + el;    //novo objeto num valor com a soma deles
-        }, 0);                  //de valor inicial 0
-        this.setState({purchaseable: sum > 0}); //coloca o state a true caso soma > 0 ou false caso contrário
+            .map(igKey => { //espécie de foreach Object Key
+                return ingredients[igKey] //dá return ao Value dessa Key
+            })
+            .reduce((sum, el) => {  //depois junta os valores do 
+                return sum + el;    //novo objeto num valor com a soma deles
+            }, 0);                  //de valor inicial 0
+        this.setState({ purchaseable: sum > 0 }); //coloca o state a true caso soma > 0 ou false caso contrário
     }
 
     addIngredientHandler = (type) => {
@@ -85,6 +86,23 @@ class BurgerBuilder extends Component {
         this.updatePurchaseState(updatedIngredients);
     }
 
+    // purchaseHandler() {
+    //     this.setState({ purchasing: true });    ------NÃO PODEMOS UTILIZAR DESTA FORMA POIS O THIS VAI DAR UNDIFINED. ISTO ACONTECE POIS ESTE MÉTODO É
+    // }                                                 CHAMADO PELO onClick do botão checkout. Para corrigir utilizar arrow function
+
+    purchaseHandler = () => {                //neste caso é MUITO IMPORTANTE criar o método como arrow function pois utilizamos o this. visto que o método é triggered por um 
+        this.setState({ purchasing: true }); // evento, o this não apontaria para esta classe caso fosse método normal purchaseHandler() { ... };
+    }
+
+    purchaseCancelHandler = () => {
+        this.setState({ purchasing: false});
+    }
+
+    purchaseContinueHandler = () => {
+        alert('You continued!')
+        //this.setState({ purchasing: false});
+    }
+
     render() {
         const disabledInfo = {
             ...this.state.ingredients
@@ -99,16 +117,22 @@ class BurgerBuilder extends Component {
         // }
         return (
             <Aux>
-                <Modal>
-                    <OrderSummary ingredients={this.state.ingredients}/>
+                <Modal show={this.state.purchasing} modalClosed={this.purchaseCancelHandler}>
+                    <OrderSummary 
+                        ingredients={this.state.ingredients} 
+                        purchaseCanceled={this.purchaseCancelHandler}
+                        purchaseContinued={this.purchaseContinueHandler}
+                        burgerPrice={this.state.totalPrice}
+                        />
                 </Modal>
                 <Burger ingredients={this.state.ingredients} />
                 <BuildControls
                     ingredientAdded={this.addIngredientHandler}
                     ingredientRemoved={this.removeIngredientHandler}
-                    disabled={disabledInfo} 
+                    disabled={disabledInfo}
                     purchaseable={this.state.purchaseable}
-                    price={this.state.totalPrice}/>
+                    ordered={this.purchaseHandler}
+                    price={this.state.totalPrice} />
             </Aux>
         );
     }
