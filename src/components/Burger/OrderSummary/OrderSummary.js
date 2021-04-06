@@ -6,7 +6,7 @@ import Button from '../../UI/Button/Button';
 class OrderSummary extends Component {
     // This could be a functional component. It is class based just to use the lifecycle hook under
     componentDidUpdate() {
-        console.log('[OrderSummary] Will Update!');
+        console.log('[OrderSummary] Updated!');
     }
 
     render() {
